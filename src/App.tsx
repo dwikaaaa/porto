@@ -17,6 +17,7 @@ import type {
   PortfolioConfig,
   PortfolioSkill,
 } from './types/portfolio';
+import { getMediaUrl } from './utils/media';
 import './App.css';
 
 const SECTIONS = ['home', 'about-me', 'projects', 'contacts'];
@@ -49,15 +50,16 @@ export function App() {
             document.title = `${cfg.name} — Portfolio`;
           }
 
-          // Dynamic Favicon using config.profile_url
-          if (cfg.profile_url) {
+          // Dynamic Favicon using config.logo_url
+          const faviconUrl = cfg.logo_url ? getMediaUrl(cfg.logo_url) : '';
+          if (faviconUrl) {
             let favicon = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
             if (!favicon) {
               favicon = document.createElement('link');
               favicon.rel = 'icon';
               document.head.appendChild(favicon);
             }
-            favicon.href = cfg.profile_url;
+            favicon.href = faviconUrl;
           }
         }
       })
