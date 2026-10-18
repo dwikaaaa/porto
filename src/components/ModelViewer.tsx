@@ -44,16 +44,16 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
     );
     camera.position.set(0, 0, 7.8);
 
-    // 3. Renderer setup - Optimized for mobile memory & thermal stability
+    // 3. Renderer setup - High precision and smooth visual rendering
     const isInitialMobile = window.innerWidth < 960;
     const renderer = new THREE.WebGLRenderer({
-      antialias: !isInitialMobile, // Disable MSAA on mobile to prevent 40MB renderbuffer allocation
+      antialias: true, // Smooth geometry edges across all devices
       alpha: true,
       powerPreference: isInitialMobile ? 'default' : 'high-performance',
-      precision: isInitialMobile ? 'mediump' : 'highp',
+      precision: 'highp', // High precision to eliminate GGX specular circular banding
     });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isInitialMobile ? 1.5 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isInitialMobile ? 1.75 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -125,16 +125,27 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
         // Center model within pivot
         model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
 
-        // Materials setup
+        // Materials setup with dithering and high precision to eliminate banding
         model.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
+            mesh.castShadow = false;
+            mesh.receiveShadow = false;
             if (mesh.material) {
               const mat = mesh.material as THREE.MeshStandardMaterial;
+              mat.precision = 'highp';
+              mat.dithering = true; // Smooths color transitions and eliminates stepping rings
               mat.roughness = Math.max(0.65, mat.roughness || 0.7);
               mat.metalness = Math.min(0.2, mat.metalness || 0.1);
+
+              if (mat.map) {
+                mat.map.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
+                mat.map.needsUpdate = true;
+              }
+              if (mat.normalMap) {
+                mat.normalMap.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
+                mat.normalMap.needsUpdate = true;
+              }
             }
           }
         });
@@ -201,7 +212,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
         lastHeight = height;
         const isMobileNow = width < 960;
         renderer.setSize(width, height);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobileNow ? 1.5 : 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobileNow ? 1.75 : 2));
       }
     };
     window.addEventListener('resize', onResize);
