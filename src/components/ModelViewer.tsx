@@ -50,7 +50,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
       antialias: !isInitialMobile, // Disable MSAA on mobile to prevent 40MB renderbuffer allocation
       alpha: true,
       powerPreference: isInitialMobile ? 'default' : 'high-performance',
-      precision: isInitialMobile ? 'mediump' : 'highp',
+      precision: 'highp',
     });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isInitialMobile ? 1.5 : 2));
