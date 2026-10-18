@@ -151,8 +151,8 @@ export function App() {
         if (el) {
           const rect = el.getBoundingClientRect();
 
-          // If inside the tall sticky projects section
-          if (id === 'projects') {
+          // If inside tall sticky sections (projects or about-me)
+          if (id === 'projects' || id === 'about-me') {
             if (rect.top <= 100 && rect.bottom >= vh * 0.45) {
               bestIdx = idx;
               minDiff = -1;
@@ -222,7 +222,9 @@ export function App() {
           shortDesc={config?.short_desc}
         />
         <AboutSection
+          name={config?.name}
           desc={config?.desc}
+          profileUrl={config?.profile_url}
           skills={skills}
           isLoading={isLoadingConfig || isLoadingSkills}
         />

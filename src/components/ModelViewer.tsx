@@ -210,11 +210,12 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
           container.style.opacity = '1';
           container.style.pointerEvents = 'auto';
         } else {
-          // Beyond About Me: Disappear in Projects and down
-          const exit = Math.min(1, Math.max(0, (progress - 1.15) / 0.35));
+          // Mobile fade out towards left during About Me horizontal scroll
+          const exit = Math.min(1, Math.max(0, (progress - 1.15) / 0.7));
+          targetPositionXRef.current = -exit * 2.2;
           targetScaleRef.current = Math.max(0, 0.85 * (1 - exit));
-          container.style.opacity = (1 - exit).toString();
-          container.style.pointerEvents = exit > 0.6 ? 'none' : 'auto';
+          container.style.opacity = Math.max(0, 1 - exit * 1.4).toString();
+          container.style.pointerEvents = exit > 0.4 ? 'none' : 'auto';
         }
       } else {
         // Desktop
@@ -227,7 +228,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
           container.style.opacity = '1';
           container.style.pointerEvents = 'auto';
         } else if (progress <= 1.0) {
-          // Transition smoothly from Center to Left (About Me)
+          // Transition smoothly from Center to Left (About Me Stage 1)
           const t = progress;
           const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
           targetPositionXRef.current = -2.35 * eased;
@@ -236,8 +237,8 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
           targetScaleRef.current = 1.0 + 0.12 * eased;
           container.style.opacity = '1';
           container.style.pointerEvents = 'auto';
-        } else if (progress <= 1.1) {
-          // Pinned on About Me
+        } else if (progress <= 1.15) {
+          // Pinned on About Me (Stage 1: Model on Left)
           targetPositionXRef.current = -2.35;
           targetPositionYRef.current = fixedY;
           targetPositionZRef.current = 0.25;
@@ -245,14 +246,14 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
           container.style.opacity = '1';
           container.style.pointerEvents = 'auto';
         } else {
-          // Model stops at About Me, disappears from Projects downwards
-          const exit = Math.min(1, Math.max(0, (progress - 1.1) / 0.35));
-          targetPositionXRef.current = -2.35 - exit * 1.5;
+          // Model fades out and translates leftwards as user scrolls into Stage 2
+          const exit = Math.min(1, Math.max(0, (progress - 1.15) / 0.85));
+          targetPositionXRef.current = -2.35 - exit * 2.8;
           targetPositionYRef.current = fixedY;
           targetPositionZRef.current = 0.25;
           targetScaleRef.current = Math.max(0, 1.12 * (1 - exit));
-          container.style.opacity = (1 - exit).toString();
-          container.style.pointerEvents = exit > 0.6 ? 'none' : 'auto';
+          container.style.opacity = Math.max(0, 1 - exit * 1.4).toString();
+          container.style.pointerEvents = exit > 0.4 ? 'none' : 'auto';
         }
       }
 
