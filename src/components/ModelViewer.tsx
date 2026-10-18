@@ -239,37 +239,22 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
         : windowProgress;
 
       const isMobile = window.innerWidth < 960;
-      // Model is only visible in Hero and About Me sections
-      const isVisible = isMobile ? progress < 0.75 : progress < 2.05;
+      // On mobile: model is absolute in Hero section, visible whenever Hero is in viewport (< 1.05)
+      // On desktop: model travels through Hero and About Me Stage 1 (< 2.05)
+      const isVisible = isMobile ? progress < 1.05 : progress < 2.05;
 
       let targetOpacity = 0;
       let targetPointerEvents = 'none';
 
       if (isMobile) {
-        if (progress <= 0.05) {
-          // Centered on First Page (Hero)
-          targetPositionXRef.current = 0;
-          targetPositionYRef.current = fixedY;
-          targetScaleRef.current = 0.95;
-          targetOpacity = 1;
-          targetPointerEvents = 'auto';
-        } else if (progress < 0.65) {
-          // Fade out smoothly as user scrolls towards About Me
-          const fade = Math.min(1, Math.max(0, (progress - 0.05) / 0.5));
-          targetPositionXRef.current = 0;
-          targetPositionYRef.current = fixedY;
-          targetScaleRef.current = Math.max(0.65, 0.95 - fade * 0.2);
-          targetOpacity = Math.max(0, 1 - fade * 1.3);
-          // On mobile, ALWAYS disable pointerEvents while scrolling to prevent touch stream cancellation
-          targetPointerEvents = 'none';
-        } else {
-          // Fully faded out when at or past About Me
-          targetPositionXRef.current = 0;
-          targetPositionYRef.current = fixedY;
-          targetScaleRef.current = 0.65; // Safe non-zero scale
-          targetOpacity = 0;
-          targetPointerEvents = 'none';
-        }
+        // Option 1 (Natural Scroll): Model is pinned in Hero with constant opacity 1.
+        // No fade-in or fade-out calculations, completely eliminating slow-scroll GPU crashes!
+        targetPositionXRef.current = 0;
+        targetPositionYRef.current = fixedY;
+        targetPositionZRef.current = 0;
+        targetScaleRef.current = 0.95;
+        targetOpacity = 1;
+        targetPointerEvents = 'auto';
       } else {
         // Desktop
         if (progress <= 0.05) {

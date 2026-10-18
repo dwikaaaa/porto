@@ -152,6 +152,19 @@
   will-change: opacity;
 }
 
+@media (max-width: 960px) {
+  /* Option 1: On mobile, 3D model scrolls naturally with Hero section */
+  .model-canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    width: 100%;
+    height: 100vh;
+  }
+}
+
 .model-canvas-container:active {
   cursor: grabbing;
 }
