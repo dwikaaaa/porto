@@ -44,14 +44,16 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
     );
     camera.position.set(0, 0, 7.8);
 
-    // 3. Renderer setup
+    // 3. Renderer setup - Optimized for mobile memory & thermal stability
+    const isInitialMobile = window.innerWidth < 960;
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: !isInitialMobile, // Disable MSAA on mobile to prevent 40MB renderbuffer allocation
       alpha: true,
-      powerPreference: 'high-performance',
+      powerPreference: isInitialMobile ? 'default' : 'high-performance',
+      precision: isInitialMobile ? 'mediump' : 'highp',
     });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isInitialMobile ? 1.5 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -176,20 +178,38 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
     window.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointercancel', onPointerUp);
 
-    // 8. Resize handler
+    // 8. Resize handler - Guarded against mobile address bar height fluctuations
+    let lastWidth = container.clientWidth;
+    let lastHeight = container.clientHeight;
+
     const onResize = () => {
       if (!container) return;
       const width = container.clientWidth;
       const height = container.clientHeight;
+
+      // Update camera aspect (inexpensive CPU math)
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      // On mobile, the URL bar expands/collapses by ~50-80px during slow scroll, firing resize continuously.
+      // NEVER reallocate WebGL buffers unless width changes (screen orientation) or height change is major (>180px)
+      const widthChanged = Math.abs(width - lastWidth) > 2;
+      const heightChangedMajor = Math.abs(height - lastHeight) > 180;
+
+      if (widthChanged || heightChangedMajor) {
+        lastWidth = width;
+        lastHeight = height;
+        const isMobileNow = width < 960;
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobileNow ? 1.5 : 2));
+      }
     };
     window.addEventListener('resize', onResize);
 
     // 9. Animation loop with safety checks and conditional rendering
     let animationFrameId: number;
+    let lastAppliedOpacity = -1;
+    let lastAppliedPointerEvents = '';
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
@@ -211,8 +231,9 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
       // Fixed vertical position (NO up-and-down oscillation / NO idleFloat)
       const fixedY = -0.48;
 
-      // Determine progress directly or from ref
-      const windowProgress = Math.max(0, window.scrollY / (window.innerHeight || 1));
+      // Determine progress using documentElement clientHeight to prevent address-bar bounce
+      const vh = document.documentElement.clientHeight || window.innerHeight || 1;
+      const windowProgress = Math.max(0, window.scrollY / vh);
       const progress = typeof scrollProgressRef.current === 'number' && scrollProgressRef.current > 0
         ? scrollProgressRef.current
         : windowProgress;
@@ -221,30 +242,33 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
       // Model is only visible in Hero and About Me sections
       const isVisible = isMobile ? progress < 0.75 : progress < 2.05;
 
+      let targetOpacity = 0;
+      let targetPointerEvents = 'none';
+
       if (isMobile) {
         if (progress <= 0.05) {
           // Centered on First Page (Hero)
           targetPositionXRef.current = 0;
           targetPositionYRef.current = fixedY;
           targetScaleRef.current = 0.95;
-          container.style.opacity = '1';
-          container.style.pointerEvents = 'auto';
+          targetOpacity = 1;
+          targetPointerEvents = 'auto';
         } else if (progress < 0.65) {
           // Fade out smoothly as user scrolls towards About Me
           const fade = Math.min(1, Math.max(0, (progress - 0.05) / 0.5));
           targetPositionXRef.current = 0;
           targetPositionYRef.current = fixedY;
           targetScaleRef.current = Math.max(0.65, 0.95 - fade * 0.2);
-          const currentOpacity = Math.max(0, 1 - fade * 1.3);
-          container.style.opacity = currentOpacity.toString();
-          container.style.pointerEvents = currentOpacity > 0.2 ? 'auto' : 'none';
+          targetOpacity = Math.max(0, 1 - fade * 1.3);
+          // On mobile, ALWAYS disable pointerEvents while scrolling to prevent touch stream cancellation
+          targetPointerEvents = 'none';
         } else {
           // Fully faded out when at or past About Me
           targetPositionXRef.current = 0;
           targetPositionYRef.current = fixedY;
           targetScaleRef.current = 0.65; // Safe non-zero scale
-          container.style.opacity = '0';
-          container.style.pointerEvents = 'none';
+          targetOpacity = 0;
+          targetPointerEvents = 'none';
         }
       } else {
         // Desktop
@@ -254,8 +278,8 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
           targetPositionYRef.current = fixedY;
           targetPositionZRef.current = 0;
           targetScaleRef.current = 1.0;
-          container.style.opacity = '1';
-          container.style.pointerEvents = 'auto';
+          targetOpacity = 1;
+          targetPointerEvents = 'auto';
         } else if (progress <= 1.0) {
           // Transition smoothly from Center to Left (About Me Stage 1)
           const t = progress;
@@ -264,16 +288,16 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
           targetPositionYRef.current = fixedY;
           targetPositionZRef.current = 0.25 * eased;
           targetScaleRef.current = 1.0 + 0.12 * eased;
-          container.style.opacity = '1';
-          container.style.pointerEvents = 'auto';
+          targetOpacity = 1;
+          targetPointerEvents = 'auto';
         } else if (progress <= 1.15) {
           // Pinned on About Me (Stage 1: Model on Left)
           targetPositionXRef.current = -2.35;
           targetPositionYRef.current = fixedY;
           targetPositionZRef.current = 0.25;
           targetScaleRef.current = 1.12;
-          container.style.opacity = '1';
-          container.style.pointerEvents = 'auto';
+          targetOpacity = 1;
+          targetPointerEvents = 'auto';
         } else {
           // Model fades out and translates leftwards as user scrolls into Stage 2
           const exit = Math.min(1, Math.max(0, (progress - 1.15) / 0.85));
@@ -282,9 +306,20 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
           targetPositionZRef.current = 0.25;
           // SAFE CLAMP: Never allow scale to reach 0 (keeps matrix determinant healthy)
           targetScaleRef.current = Math.max(0.2, 1.12 * (1 - exit * 0.8));
-          container.style.opacity = Math.max(0, 1 - exit * 1.4).toString();
-          container.style.pointerEvents = exit > 0.4 ? 'none' : 'auto';
+          targetOpacity = Math.max(0, 1 - exit * 1.4);
+          targetPointerEvents = exit > 0.4 ? 'none' : 'auto';
         }
+      }
+
+      // Batch DOM mutations and avoid redundant writes
+      const roundedOpacity = Math.round(targetOpacity * 100) / 100;
+      if (Math.abs(roundedOpacity - lastAppliedOpacity) >= 0.01) {
+        lastAppliedOpacity = roundedOpacity;
+        container.style.opacity = roundedOpacity.toString();
+      }
+      if (lastAppliedPointerEvents !== targetPointerEvents) {
+        lastAppliedPointerEvents = targetPointerEvents;
+        container.style.pointerEvents = targetPointerEvents;
       }
 
       // Safe position lerp with NaN checks

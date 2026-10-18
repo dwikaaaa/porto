@@ -149,7 +149,7 @@
   pointer-events: auto;
   cursor: grab;
   touch-action: pan-y;
-  transition: opacity 0.4s ease;
+  will-change: opacity;
 }
 
 .model-canvas-container:active {
