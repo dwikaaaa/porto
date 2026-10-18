@@ -124,8 +124,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ config }) => {
                       rel="noreferrer"
                       className="contact-social-card"
                     >
-                      <span className="social-card-name">{item.name}</span>
-                      {item.handle && <span className="social-card-handle">{item.handle}</span>}
+                      <div className="social-card-info">
+                        <span className="social-card-name">{item.name}</span>
+                        {item.handle && <span className="social-card-handle">{item.handle}</span>}
+                      </div>
                       <span className="social-card-arrow">↗</span>
                     </a>
                   ))}

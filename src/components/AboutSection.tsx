@@ -62,6 +62,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     if (!container || !track) return;
 
     const handleScroll = () => {
+      // On mobile viewports, About Me is a natural vertical stacked layout (Photo on top, description below)
+      if (window.innerWidth <= 960) {
+        track.style.transform = 'none';
+        return;
+      }
+
       const rect = container.getBoundingClientRect();
       const vh = window.innerHeight;
       const totalDistance = container.offsetHeight - vh;
@@ -71,17 +77,19 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       const currentDistance = -rect.top;
       const progress = Math.min(1, Math.max(0, currentDistance / totalDistance));
 
-      // Calculate translation using physical panel offset distance
-      const children = track.children;
+      // Calculate translation using physical visible panel offset distance
+      const visibleChildren = Array.from(track.children).filter((el) => {
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && (el as HTMLElement).offsetWidth > 0;
+      }) as HTMLElement[];
+
       let shiftDistance = 0;
-      if (children.length >= 2) {
-        const p1 = children[0] as HTMLElement;
-        const p2 = children[1] as HTMLElement;
-        shiftDistance = p2.offsetLeft - p1.offsetLeft;
+      if (visibleChildren.length >= 2) {
+        shiftDistance = visibleChildren[1].offsetLeft - visibleChildren[0].offsetLeft;
       }
       if (shiftDistance <= 0) {
-        const padding = Math.max(40, window.innerWidth * 0.04);
-        shiftDistance = (window.innerWidth - padding * 2 - 48) / 2 + 48;
+        const padding = Math.max(20, window.innerWidth * 0.04);
+        shiftDistance = window.innerWidth - padding * 2;
       }
 
       track.style.transform = `translate3d(-${progress * shiftDistance}px, 0, 0)`;
@@ -264,10 +272,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 </div>
 
                 <div className="about-photo-info">
-                  <div className="photo-info-badge">
-                    <span className="photo-badge-dot" />
-                    <span className="photo-badge-label">Available for endeavors</span>
-                  </div>
                   <h3 className="photo-artisan-name">{name || 'Andikas'}</h3>
                   <p className="photo-artisan-role">Software Engineer & Web Artisan</p>
                 </div>

@@ -197,25 +197,26 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
       const isMobile = window.innerWidth < 960;
 
       if (isMobile) {
-        if (progress <= 0.25) {
+        if (progress <= 0.05) {
+          // Centered on First Page (Hero)
           targetPositionXRef.current = 0;
           targetPositionYRef.current = fixedY;
           targetScaleRef.current = 0.95;
           container.style.opacity = '1';
           container.style.pointerEvents = 'auto';
-        } else if (progress <= 1.15) {
+        } else if (progress < 0.65) {
+          // Fade out smoothly as user scrolls towards About Me
+          const fade = Math.min(1, Math.max(0, (progress - 0.05) / 0.5));
           targetPositionXRef.current = 0;
           targetPositionYRef.current = fixedY;
-          targetScaleRef.current = 0.85;
-          container.style.opacity = '1';
-          container.style.pointerEvents = 'auto';
+          targetScaleRef.current = Math.max(0.65, 0.95 - fade * 0.2);
+          const currentOpacity = Math.max(0, 1 - fade * 1.3);
+          container.style.opacity = currentOpacity.toString();
+          container.style.pointerEvents = currentOpacity > 0.2 ? 'auto' : 'none';
         } else {
-          // Mobile fade out towards left during About Me horizontal scroll
-          const exit = Math.min(1, Math.max(0, (progress - 1.15) / 0.7));
-          targetPositionXRef.current = -exit * 2.2;
-          targetScaleRef.current = Math.max(0, 0.85 * (1 - exit));
-          container.style.opacity = Math.max(0, 1 - exit * 1.4).toString();
-          container.style.pointerEvents = exit > 0.4 ? 'none' : 'auto';
+          // Fully faded out when at or past About Me
+          container.style.opacity = '0';
+          container.style.pointerEvents = 'none';
         }
       } else {
         // Desktop

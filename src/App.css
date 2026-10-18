@@ -492,11 +492,11 @@
 }
 
 .gothic-paragraph-plain {
-  font-family: var(--font-gothic);
-  font-size: 1.3rem;
-  line-height: 1.84;
-  color: #f4f4f5;
-  letter-spacing: 0.02em;
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #e4e4e7;
+  letter-spacing: -0.01em;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
   font-weight: 400;
   user-select: text;
@@ -611,8 +611,10 @@
 }
 
 .portrait-monogram {
-  font-family: var(--font-gothic);
-  font-size: 3.5rem;
+  font-family: var(--font-sans);
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   color: rgba(255, 255, 255, 0.4);
 }
 
@@ -653,11 +655,11 @@
 }
 
 .photo-artisan-name {
-  font-family: var(--font-gothic);
-  font-size: 1.45rem;
-  font-weight: 500;
+  font-family: var(--font-sans);
+  font-size: 1.35rem;
+  font-weight: 600;
   color: #ffffff;
-  letter-spacing: 0.03em;
+  letter-spacing: -0.01em;
   margin: 0;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
@@ -704,6 +706,15 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
+}
+
+.section-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a1a1aa;
 }
 
 .header-controls-row {
@@ -993,6 +1004,16 @@
   flex-shrink: 0;
 }
 
+/* Mobile Trail Bar - Hidden on Desktop */
+.card-stack-trail-bar {
+  display: none;
+}
+
+/* Mobile Bottom Action Button - Hidden on Desktop */
+.projects-mobile-bottom-action {
+  display: none;
+}
+
 /* Standalone See More Button (End of horizontal scroll) */
 .see-more-action-container {
   display: flex;
@@ -1001,6 +1022,18 @@
   padding: 0 48px 0 16px;
   flex-shrink: 0;
   height: 500px;
+}
+
+.see-more-content-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.see-more-hint {
+  display: none;
 }
 
 .see-more-direct-btn {
@@ -1284,14 +1317,27 @@
   transform: translateY(-2px);
 }
 
+.social-card-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .social-card-name {
-  font-size: 0.86rem;
-  font-weight: 500;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
 }
 
 .social-card-handle {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   color: #71717a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .social-card-arrow {
@@ -1321,24 +1367,55 @@
 }
 
 /* ========================================================
-   RESPONSIVE QUERIES
+   COMPREHENSIVE MULTI-DEVICE RESPONSIVE QUERIES
    ======================================================== */
+
+/* Tablet & Smaller Laptops (<= 1024px) */
+@media (max-width: 1024px) {
+  .section {
+    padding: 80px 32px 40px;
+  }
+
+  .about-horizontal-header,
+  .projects-horizontal-header {
+    padding: 0 32px;
+  }
+
+  .about-horizontal-track,
+  .projects-horizontal-track {
+    padding: 0 32px;
+  }
+
+  .project-horizontal-card {
+    width: 380px;
+    min-width: 380px;
+    height: 480px;
+  }
+}
+
+/* Tablet & Mobile Breakpoint (<= 960px) */
 @media (max-width: 960px) {
   .glass-navbar {
-    padding: 0 20px;
+    padding: 0 18px;
     height: 52px;
+    width: min(94%, 840px);
   }
 
   .navbar-links {
-    gap: 18px;
+    gap: 14px;
   }
 
   .brand-name {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .nav-item {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
+    padding: 4px 6px;
   }
 
   .section {
@@ -1347,35 +1424,390 @@
     padding: 80px 20px 40px;
   }
 
+  /* About Section on Tablet/Mobile: Direct vertical scroll with photo at top & description below */
+  .about-scroll-wrapper {
+    height: auto !important;
+    position: relative !important;
+  }
+
+  .about-sticky-viewport {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    padding: 72px 24px 40px !important;
+    justify-content: flex-start !important;
+    background: radial-gradient(circle at 50% 15%, rgba(255, 255, 255, 0.035) 0%, transparent 70%) !important;
+  }
+
   .about-horizontal-header {
-    padding: 0 20px;
+    padding: 0 !important;
+    margin-bottom: 24px !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  .about-horizontal-header .header-meta {
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .about-horizontal-header .section-eyebrow {
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .about-horizontal-header .header-content {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .about-horizontal-header .section-title {
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .about-horizontal-header .header-controls-row {
+    display: none !important;
+  }
+
+  .about-track-container {
+    overflow: visible !important;
+    padding: 0 !important;
+    width: 100% !important;
   }
 
   .about-horizontal-track {
-    padding: 0 20px;
-    gap: 20px;
+    display: flex !important;
+    flex-direction: column !important;
+    transform: none !important;
+    padding: 0 !important;
+    gap: 32px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    will-change: auto !important;
   }
 
-  .about-panel {
-    width: calc(100vw - 40px);
-    min-width: calc(100vw - 40px);
-    max-width: none;
-    height: auto;
-    min-height: 480px;
+  /* 3D model spacer is hidden */
+  .about-panel-model {
+    display: none !important;
+  }
+
+  /* 1. Foto Profil di ATAS (Rata Tengah) */
+  .about-panel-photo {
+    order: 1 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .about-photo-wrapper {
+    width: 100% !important;
+    max-width: 340px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
   }
 
   .about-photo-frame {
-    height: 280px;
+    height: 280px !important;
+    width: 280px !important;
+    max-width: 100% !important;
+    margin: 0 auto 16px !important;
+  }
+
+  .about-photo-info {
+    text-align: center !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+
+  .photo-artisan-name {
+    font-size: 1.35rem !important;
+    margin-bottom: 4px !important;
+    text-align: center !important;
+  }
+
+  .photo-artisan-role {
+    font-size: 0.84rem !important;
+    text-align: center !important;
+  }
+
+  /* 2. Deskripsi di BAWAH (Rata Tengah) */
+  .about-panel-text {
+    order: 2 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    text-align: center !important;
+  }
+
+  .about-plain-container {
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .about-plain-eyebrow {
+    margin-bottom: 14px !important;
+    justify-content: center !important;
+    width: 100% !important;
+  }
+
+  .about-eyebrow-text {
+    text-align: center !important;
+  }
+
+  .about-plain-paragraphs {
+    text-align: center !important;
+    width: 100% !important;
   }
 
   .gothic-paragraph,
   .gothic-paragraph-plain {
-    font-size: 1.15rem;
-    line-height: 1.65;
+    font-size: 0.98rem;
+    line-height: 1.7;
+    margin-bottom: 14px !important;
+    text-align: center !important;
   }
 
+  .tech-stack-row-plain {
+    margin-top: 18px !important;
+    justify-content: center !important;
+    width: 100% !important;
+  }
+
+  /* Projects Section on Tablet/Mobile: Scroll Stack Animation */
+  .projects-scroll-wrapper {
+    height: calc(100vh + (var(--mobile-stack-count, 4) - 1) * 85vh) !important;
+    position: relative !important;
+  }
+
+  .projects-sticky-viewport {
+    position: sticky !important;
+    top: 0 !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    padding: 100px 18px 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  .projects-horizontal-header {
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 0 auto 12px !important;
+    padding: 0 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .header-meta {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .section-eyebrow {
+    font-size: 0.76rem !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .header-controls-row {
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .gallery-arrows {
+    display: none !important;
+  }
+
+  .card-indicators-list {
+    gap: 6px !important;
+  }
+
+  .indicator-dot {
+    width: 6px !important;
+    height: 6px !important;
+  }
+
+  .indicator-dot.is-active {
+    width: 18px !important;
+  }
+
+  .projects-track-container {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 0 auto !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    height: calc(100vh - 195px) !important;
+    overflow: hidden !important;
+    display: block !important;
+    padding: 0 !important;
+  }
+
+  .projects-horizontal-track {
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0 !important;
+    transform: none !important;
+  }
+
+  .project-horizontal-card {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: calc(100% - 90px) !important;
+    max-height: 490px !important;
+    min-height: 380px !important;
+    margin: 0 auto !important;
+    background: #121216 !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.85), 0 20px 40px rgba(0, 0, 0, 0.9) !important;
+    box-sizing: border-box !important;
+    padding: 10px 10px 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    will-change: transform, opacity !important;
+    overflow: hidden !important;
+    cursor: pointer;
+  }
+
+  .card-stack-trail-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 28px;
+    min-height: 28px;
+    padding: 0 4px 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 6px;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .trail-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .trail-idx {
+    font-family: var(--font-sans);
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+
+  .trail-divider {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.35);
+    flex-shrink: 0;
+  }
+
+  .trail-title {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+  }
+
+  .trail-badge {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    color: #a1a1aa;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .project-card-image-box {
+    height: 145px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Hide the horizontal track see-more card on mobile */
+  .see-more-action-container {
+    display: none !important;
+  }
+
+  /* Regular explore button below the project stack on mobile */
+  .projects-mobile-bottom-action {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 12px auto 0 !important;
+    opacity: 0;
+    transform: translateY(14px);
+    pointer-events: none;
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0 !important;
+    z-index: 50;
+  }
+
+  .projects-mobile-bottom-action.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .projects-mobile-bottom-action .see-more-direct-btn {
+    padding: 13px 32px;
+    font-size: 0.94rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.15);
+  }
+
+  /* Contact Section on Tablet/Mobile */
   .contact-card-glass {
-    padding: 24px 18px;
+    padding: 28px 20px;
   }
 
   .contact-methods-grid {
@@ -1398,19 +1830,375 @@
     justify-content: center;
   }
 
+  .contact-social-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .contact-social-card {
+    width: 100% !important;
+    padding: 12px 18px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* Smartphone & Compact Screen Breakpoint (<= 640px) */
+@media (max-width: 640px) {
+  .navbar-wrapper {
+    top: 12px;
+  }
+
+  .glass-navbar {
+    width: 95%;
+    padding: 0 14px;
+    height: 48px;
+  }
+
+  .navbar-links {
+    gap: 8px;
+  }
+
+  .brand-name {
+    font-size: 0.95rem;
+    max-width: 110px;
+  }
+
+  .nav-item {
+    font-size: 0.78rem;
+    padding: 3px 5px;
+  }
+
+  .section {
+    padding: 68px 16px 36px;
+  }
+
+  /* Hero Section */
+  .hero-intro-badge {
+    bottom: 24px;
+    width: min(92%, 420px);
+    padding: 10px 18px;
+  }
+
+  .hero-intro-text {
+    font-size: 0.82rem;
+  }
+
+  /* Headers */
+  .about-sticky-viewport,
+  .projects-sticky-viewport {
+    padding: 64px 0 16px;
+  }
+
+  .about-horizontal-header {
+    padding: 0 16px;
+    margin-bottom: 20px;
+    text-align: center !important;
+  }
+
+  .about-horizontal-header .header-meta {
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .about-horizontal-header .section-eyebrow {
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .about-horizontal-header .header-content {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 8px;
+    width: 100% !important;
+  }
+
+  .about-horizontal-header .section-title {
+    font-size: 1.55rem;
+    line-height: 1.25;
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .projects-horizontal-header {
+    padding: 0 16px;
+    margin-bottom: 12px;
+  }
+
+  .projects-horizontal-header .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .projects-horizontal-header .section-title {
+    font-size: 1.55rem;
+    line-height: 1.25;
+  }
+
+  .horizontal-progress-bar {
+    width: 70px;
+  }
+
+  .header-controls-row {
+    gap: 10px;
+  }
+
+  .badge-hint,
+  .badge-unlock {
+    font-size: 0.78rem;
+    padding: 4px 12px;
+  }
+
+  /* About Section on Smartphone (<= 640px) */
+  .about-sticky-viewport {
+    padding: 68px 16px 40px !important;
+  }
+
+  .about-horizontal-header {
+    margin-bottom: 20px !important;
+  }
+
+  .about-horizontal-track {
+    gap: 24px !important;
+  }
+
+  .about-photo-wrapper {
+    max-width: 260px !important;
+  }
+
+  .about-photo-frame {
+    height: 240px !important;
+    width: 240px !important;
+    max-width: 100% !important;
+    margin: 0 auto 14px !important;
+  }
+
+  .photo-artisan-name {
+    font-size: 1.25rem !important;
+  }
+
+  .photo-artisan-role {
+    font-size: 0.8rem !important;
+  }
+
+  .about-plain-container {
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .about-plain-eyebrow {
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+
+  .about-eyebrow-text {
+    font-size: 0.75rem;
+  }
+
+  .gothic-paragraph,
+  .gothic-paragraph-plain {
+    font-size: 0.94rem;
+    line-height: 1.65;
+  }
+
+  .tech-stack-row-plain {
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .tech-badge-plain {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+
+  /* Projects Section */
+  .projects-sticky-viewport {
+    padding: 96px 14px 14px !important;
+  }
+
+  .projects-track-container {
+    height: calc(100vh - 185px) !important;
+    max-width: 360px !important;
+  }
+
   .project-horizontal-card {
-    width: 320px;
-    min-width: 320px;
-    height: 480px;
-    padding: 14px 14px 18px;
+    height: calc(100% - 80px) !important;
+    max-height: 480px !important;
+    min-height: 360px !important;
+    padding: 8px 10px 14px !important;
   }
 
   .project-card-image-box {
-    height: 155px;
+    height: 135px !important;
   }
 
-  .see-more-action-container {
-    height: 480px;
+  .project-title {
+    font-size: 1.05rem;
+    text-align: left;
+  }
+
+  .project-description {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    text-align: left;
+  }
+
+  /* Contact Section */
+  .contact-card-glass {
+    padding: 22px 14px;
+  }
+
+  .contact-lead-text {
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  .contact-social-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .contact-social-card {
+    width: 100% !important;
+    padding: 12px 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  .social-card-name {
+    font-size: 0.86rem;
+  }
+
+  .social-card-handle {
+    font-size: 0.76rem;
+  }
+
+  /* Modal */
+  .project-modal-backdrop {
+    padding: 14px 10px;
+  }
+
+  .project-modal-card {
+    padding: 22px 16px;
+    border-radius: 18px;
+    max-height: 92vh;
+  }
+
+  .modal-thumbnail-wrapper {
+    height: 160px;
+    margin-bottom: 14px;
+  }
+
+  .modal-title {
+    font-size: 1.35rem;
+  }
+
+  .modal-description {
+    font-size: 0.86rem;
+    margin-bottom: 18px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .modal-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Extra Small Mobile Screens (<= 380px) */
+@media (max-width: 380px) {
+  .glass-navbar {
+    padding: 0 10px;
+    height: 44px;
+  }
+
+  .brand-name {
+    font-size: 0.85rem;
+    max-width: 85px;
+  }
+
+  .navbar-links {
+    gap: 6px;
+  }
+
+  .nav-item {
+    font-size: 0.72rem;
+    padding: 2px 3px;
+  }
+
+  .horizontal-progress-bar {
+    display: none;
+  }
+
+  .projects-sticky-viewport {
+    padding: 88px 12px 12px !important;
+  }
+
+  .projects-track-container {
+    height: calc(100vh - 175px) !important;
+  }
+
+  .project-horizontal-card {
+    height: calc(100% - 75px) !important;
+    min-height: 330px !important;
+  }
+
+  .project-card-image-box {
+    height: 115px !important;
+  }
+
+  .contact-social-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-photo-frame {
+    height: 200px !important;
+    width: 200px !important;
+  }
+}
+
+/* Short Viewports & Mobile Landscape (<= 720px height) */
+@media (max-height: 720px) {
+  .about-sticky-viewport {
+    padding: 56px 0 12px;
+  }
+
+  .projects-sticky-viewport {
+    padding: 82px 14px 10px !important;
+  }
+
+  .about-horizontal-header,
+  .projects-horizontal-header {
+    margin-bottom: 8px;
+  }
+
+  .projects-track-container {
+    height: calc(100vh - 165px) !important;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+  }
+
+  .project-horizontal-card {
+    height: calc(100% - 75px) !important;
+    min-height: 320px !important;
+  }
+
+  .project-card-image-box {
+    height: 110px !important;
+  }
+
+  .about-photo-frame {
+    height: 180px;
   }
 }
 
