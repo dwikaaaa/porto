@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 interface ModelViewerProps {
-  scrollProgress: number; // 0 (Hero) to 1 (About Me) and beyond
+  scrollProgress?: number; // Optional: 0 (Hero) to 1 (About Me) and beyond
 }
 
 export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
@@ -20,9 +20,9 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
   const targetPositionYRef = useRef<number>(-0.5);
   const targetPositionZRef = useRef<number>(0);
   const targetScaleRef = useRef<number>(1);
-  const scrollProgressRef = useRef<number>(0);
+  const scrollProgressRef = useRef<number | undefined>(scrollProgress);
 
-  // Keep scrollProgressRef updated
+  // Keep scrollProgressRef updated if provided externally
   useEffect(() => {
     scrollProgressRef.current = scrollProgress;
   }, [scrollProgress]);
@@ -56,6 +56,24 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
     renderer.toneMappingExposure = 1.15;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(renderer.domElement);
+
+    // WebGL Context Loss & Restoration Listeners
+    let isContextLost = false;
+    const domElement = renderer.domElement;
+
+    const onContextLost = (e: Event) => {
+      e.preventDefault(); // Prevents browser from permanently disabling WebGL
+      isContextLost = true;
+      console.warn('WebGL context lost. ModelViewer render paused.');
+    };
+
+    const onContextRestored = () => {
+      isContextLost = false;
+      console.log('WebGL context restored. ModelViewer render resumed.');
+    };
+
+    domElement.addEventListener('webglcontextlost', onContextLost, false);
+    domElement.addEventListener('webglcontextrestored', onContextRestored, false);
 
     // 4. Lights setup (Gothic statue atmosphere)
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
@@ -170,7 +188,7 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
     };
     window.addEventListener('resize', onResize);
 
-    // 9. Animation loop
+    // 9. Animation loop with safety checks and conditional rendering
     let animationFrameId: number;
 
     const animate = () => {
@@ -193,8 +211,15 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
       // Fixed vertical position (NO up-and-down oscillation / NO idleFloat)
       const fixedY = -0.48;
 
-      const progress = scrollProgressRef.current;
+      // Determine progress directly or from ref
+      const windowProgress = Math.max(0, window.scrollY / (window.innerHeight || 1));
+      const progress = typeof scrollProgressRef.current === 'number' && scrollProgressRef.current > 0
+        ? scrollProgressRef.current
+        : windowProgress;
+
       const isMobile = window.innerWidth < 960;
+      // Model is only visible in Hero and About Me sections
+      const isVisible = isMobile ? progress < 0.75 : progress < 2.05;
 
       if (isMobile) {
         if (progress <= 0.05) {
@@ -215,6 +240,9 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
           container.style.pointerEvents = currentOpacity > 0.2 ? 'auto' : 'none';
         } else {
           // Fully faded out when at or past About Me
+          targetPositionXRef.current = 0;
+          targetPositionYRef.current = fixedY;
+          targetScaleRef.current = 0.65; // Safe non-zero scale
           container.style.opacity = '0';
           container.style.pointerEvents = 'none';
         }
@@ -252,23 +280,54 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
           targetPositionXRef.current = -2.35 - exit * 2.8;
           targetPositionYRef.current = fixedY;
           targetPositionZRef.current = 0.25;
-          targetScaleRef.current = Math.max(0, 1.12 * (1 - exit));
+          // SAFE CLAMP: Never allow scale to reach 0 (keeps matrix determinant healthy)
+          targetScaleRef.current = Math.max(0.2, 1.12 * (1 - exit * 0.8));
           container.style.opacity = Math.max(0, 1 - exit * 1.4).toString();
           container.style.pointerEvents = exit > 0.4 ? 'none' : 'auto';
         }
       }
 
-      // Smooth position lerp (responsive to scroll)
-      rootGroup.position.x += (targetPositionXRef.current - rootGroup.position.x) * 0.18;
-      rootGroup.position.y += (targetPositionYRef.current - rootGroup.position.y) * 0.18;
-      rootGroup.position.z += (targetPositionZRef.current - rootGroup.position.z) * 0.18;
+      // Safe position lerp with NaN checks
+      const targetX = targetPositionXRef.current;
+      const targetY = targetPositionYRef.current;
+      const targetZ = targetPositionZRef.current;
 
-      // Smooth scale lerp
-      const currentScale = rootGroup.scale.x;
-      const newScale = currentScale + (targetScaleRef.current - currentScale) * 0.18;
-      rootGroup.scale.setScalar(newScale);
+      if (Number.isFinite(targetX)) {
+        const curX = Number.isFinite(rootGroup.position.x) ? rootGroup.position.x : targetX;
+        rootGroup.position.x = curX + (targetX - curX) * 0.18;
+      }
+      if (Number.isFinite(targetY)) {
+        const curY = Number.isFinite(rootGroup.position.y) ? rootGroup.position.y : targetY;
+        rootGroup.position.y = curY + (targetY - curY) * 0.18;
+      }
+      if (Number.isFinite(targetZ)) {
+        const curZ = Number.isFinite(rootGroup.position.z) ? rootGroup.position.z : targetZ;
+        rootGroup.position.z = curZ + (targetZ - curZ) * 0.18;
+      }
 
-      renderer.render(scene, camera);
+      // Safe scale lerp with NaN checks (guarantee strictly positive scale)
+      const currentScale = Number.isFinite(rootGroup.scale.x) && rootGroup.scale.x > 0.05
+        ? rootGroup.scale.x
+        : 1.0;
+      const targetScale = Number.isFinite(targetScaleRef.current) && targetScaleRef.current > 0.05
+        ? targetScaleRef.current
+        : 1.0;
+      const newScale = currentScale + (targetScale - currentScale) * 0.18;
+      if (Number.isFinite(newScale) && newScale > 0.05) {
+        rootGroup.scale.setScalar(newScale);
+      }
+
+      // Toggle Three.js visibility
+      rootGroup.visible = isVisible;
+
+      // Only perform GPU render if model is visible and WebGL context is active
+      if (isVisible && !isContextLost) {
+        try {
+          renderer.render(scene, camera);
+        } catch (err) {
+          console.warn('ModelViewer WebGL render error suppressed:', err);
+        }
+      }
     };
 
     animate();
@@ -276,6 +335,8 @@ export const ModelViewer: React.FC<ModelViewerProps> = ({ scrollProgress }) => {
     // 10. Cleanup
     return () => {
       cancelAnimationFrame(animationFrameId);
+      domElement.removeEventListener('webglcontextlost', onContextLost);
+      domElement.removeEventListener('webglcontextrestored', onContextRestored);
       window.removeEventListener('resize', onResize);
       container.removeEventListener('pointerdown', onPointerDown);
       window.removeEventListener('pointermove', onPointerMove);

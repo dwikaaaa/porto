@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import Lenis from 'lenis';
 import { Navbar } from './components/Navbar';
 import { ModelViewer } from './components/ModelViewer';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { HeroSection } from './components/HeroSection';
 import { AboutSection } from './components/AboutSection';
 import { ProjectsSection } from './components/ProjectsSection';
@@ -23,7 +24,6 @@ import './App.css';
 const SECTIONS = ['home', 'about-me', 'projects', 'contacts'];
 
 export function App() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState('home');
   const [config, setConfig] = useState<PortfolioConfig | null>(null);
   const [skills, setSkills] = useState<PortfolioSkill[]>([]);
@@ -141,10 +141,7 @@ export function App() {
 
     // Continuous real-time scroll synchronization
     const onScroll = () => {
-      const scrollY = window.scrollY;
       const vh = window.innerHeight || 1;
-      const progress = Math.max(0, scrollY / vh);
-      setScrollProgress(progress);
 
       // Determine active section based on proximity to center
       let bestIdx = 0;
@@ -171,8 +168,10 @@ export function App() {
         }
       });
 
-      activeSectionIndexRef.current = bestIdx;
-      setActiveSection(SECTIONS[bestIdx]);
+      if (bestIdx !== activeSectionIndexRef.current) {
+        activeSectionIndexRef.current = bestIdx;
+        setActiveSection(SECTIONS[bestIdx]);
+      }
     };
 
     lenis.on('scroll', onScroll);
@@ -218,8 +217,10 @@ export function App() {
         brandName={config?.name || 'Portfolio'}
       />
 
-      {/* Fixed 3D canvas positioned in the background / layer */}
-      <ModelViewer scrollProgress={scrollProgress} />
+      {/* Fixed 3D canvas positioned in the background / layer with crash protection */}
+      <ErrorBoundary>
+        <ModelViewer />
+      </ErrorBoundary>
 
       {/* Page Sections matching frontend template */}
       <main className="content-container">
