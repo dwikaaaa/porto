@@ -137,9 +137,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ config }) => {
 
         <footer className="portfolio-footer">
           <p>© {CURRENT_YEAR} {config?.name || 'Portfolio'}. All rights reserved.</p>
-          <p className="footer-sub">
-            Constructed with Laravel spirit, React, Three.js & Modern Web standards.
-          </p>
         </footer>
       </div>
     </section>

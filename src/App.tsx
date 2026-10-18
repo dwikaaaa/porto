@@ -6,6 +6,7 @@ import { HeroSection } from './components/HeroSection';
 import { AboutSection } from './components/AboutSection';
 import { ProjectsSection } from './components/ProjectsSection';
 import { ContactSection } from './components/ContactSection';
+import { CursorTracker } from './components/CursorTracker';
 import {
   fetchPortfolioConfig,
   fetchPortfolioSkills,
@@ -205,6 +206,9 @@ export function App() {
 
   return (
     <div className="portfolio-app">
+      {/* Sleek circular white-border cursor tracker */}
+      <CursorTracker />
+
       {/* Glassmorphic floating navbar with dynamic brand name */}
       <Navbar
         activeSection={activeSection}
