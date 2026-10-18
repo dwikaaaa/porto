@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { PortfolioArticle } from '../types/portfolio';
+import { getMediaUrl } from '../utils/media';
 
 export interface DisplayProject {
   id: string;
@@ -60,7 +61,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
       return {
         id: String(art.id),
         title: art.title,
-        subtitle: art.sub_title || art.category?.name || 'Project',
+        subtitle: art.category?.name || 'Project',
         description,
         tags,
         link: '#',
@@ -185,15 +186,18 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
               Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="project-horizontal-card project-skeleton-card" aria-busy="true">
                   <div className="card-glass-glow" aria-hidden="true" />
-                  <div className="card-top">
-                    <div className="skeleton-line skeleton-w-40" />
-                    <div className="skeleton-line skeleton-title-bar" />
-                  </div>
-                  <div className="skeleton-line skeleton-w-full" />
-                  <div className="skeleton-line skeleton-w-80" />
-                  <div className="skeleton-badge-row">
-                    <div className="skeleton-badge" />
-                    <div className="skeleton-badge" />
+                  <div className="skeleton-image-box" />
+                  <div className="project-card-body">
+                    <div className="card-top">
+                      <div className="skeleton-line skeleton-w-40" />
+                      <div className="skeleton-line skeleton-title-bar" />
+                    </div>
+                    <div className="skeleton-line skeleton-w-full" />
+                    <div className="skeleton-line skeleton-w-80" />
+                    <div className="skeleton-badge-row">
+                      <div className="skeleton-badge" />
+                      <div className="skeleton-badge" />
+                    </div>
                   </div>
                 </div>
               ))
@@ -213,22 +217,40 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                   onClick={() => goToCard(idx)}
                 >
                   <div className="card-glass-glow" aria-hidden="true" />
-                  <div className="card-top">
-                    <div className="card-index-row">
-                      <span className="card-index">0{idx + 1}</span>
-                      <span className="project-subtitle">{project.subtitle}</span>
+
+                  {/* Thumbnail Image from API articles.thumbnail_url */}
+                  {project.thumbnailUrl && (
+                    <div className="project-card-image-box">
+                      <img
+                        src={getMediaUrl(project.thumbnailUrl)}
+                        alt={project.title}
+                        className="project-card-image"
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.currentTarget.parentElement as HTMLElement).style.display = 'none';
+                        }}
+                      />
                     </div>
-                    <h3 className="project-title">{project.title}</h3>
-                  </div>
+                  )}
 
-                  <p className="project-description">{project.description}</p>
+                  <div className="project-card-body">
+                    <div className="card-top">
+                      <div className="card-index-row">
+                        <span className="card-index">0{idx + 1}</span>
+                        <span className="project-subtitle">{project.subtitle}</span>
+                      </div>
+                      <h3 className="project-title">{project.title}</h3>
+                    </div>
 
-                  <div className="project-tags">
-                    {project.tags.map((tag, tIdx) => (
-                      <span key={tIdx} className="tag-pill">
-                        {tag}
-                      </span>
-                    ))}
+                    <p className="project-description">{project.description}</p>
+
+                    <div className="project-tags">
+                      {project.tags.map((tag, tIdx) => (
+                        <span key={tIdx} className="tag-pill">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="project-actions">
@@ -313,7 +335,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             {selectedProject.thumbnailUrl && (
               <div className="modal-thumbnail-wrapper">
                 <img
-                  src={selectedProject.thumbnailUrl}
+                  src={getMediaUrl(selectedProject.thumbnailUrl)}
                   alt={selectedProject.title}
                   className="modal-thumbnail-img"
                   onError={(e) => {

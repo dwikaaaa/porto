@@ -84,7 +84,7 @@ export async function fetchPortfolioConfig(): Promise<PortfolioConfig | null> {
 }
 
 /**
- * Fetch skills list directly (/skills), falling back to live bundle (/portfolio) if /skills is corrupted
+ * Fetch skills list directly (/skills), falling back to query bypass or bundle if corrupted
  */
 export async function fetchPortfolioSkills(): Promise<PortfolioSkill[]> {
   const data = await fetchEndpoint<PortfolioSkill[]>('skills');
@@ -92,7 +92,13 @@ export async function fetchPortfolioSkills(): Promise<PortfolioSkill[]> {
     return data;
   }
 
-  // If /skills returned non-array or corrupted cache, fetch live skills from /portfolio bundle
+  // Bypass corrupted cache using search query parameter
+  const searchData = await fetchEndpoint<PortfolioSkill[]>('skills?search=%25');
+  if (Array.isArray(searchData) && searchData.length > 0) {
+    return searchData;
+  }
+
+  // Fallback to /portfolio bundle if needed
   const bundle = await fetchEndpoint<PortfolioData>('portfolio');
   if (bundle && Array.isArray(bundle.skills) && bundle.skills.length > 0) {
     return bundle.skills;
@@ -102,7 +108,7 @@ export async function fetchPortfolioSkills(): Promise<PortfolioSkill[]> {
 }
 
 /**
- * Fetch articles / projects list directly (/articles)
+ * Fetch articles / projects list directly (/articles or /portfolio)
  */
 export async function fetchPortfolioArticles(category?: string, search?: string): Promise<PortfolioArticle[]> {
   const params = new URLSearchParams();
@@ -116,11 +122,16 @@ export async function fetchPortfolioArticles(category?: string, search?: string)
     return data;
   }
 
-  // If unfiltered request returned non-array, fallback to search=% query
+  // If unfiltered request returned non-array, fallback to query bypass or /portfolio bundle
   if (!category && !search) {
-    const fallbackData = await fetchEndpoint<PortfolioArticle[]>('articles?search=%25');
-    if (Array.isArray(fallbackData) && fallbackData.length > 0) {
-      return fallbackData;
+    const searchData = await fetchEndpoint<PortfolioArticle[]>('articles?search=%25');
+    if (Array.isArray(searchData) && searchData.length > 0) {
+      return searchData;
+    }
+
+    const bundle = await fetchEndpoint<PortfolioData>('portfolio');
+    if (bundle && Array.isArray(bundle.articles) && bundle.articles.length > 0) {
+      return bundle.articles;
     }
   }
 
