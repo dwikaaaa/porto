@@ -20,6 +20,7 @@ import type {
 } from './types/portfolio';
 import { getMediaUrl } from './utils/media';
 import './App.css';
+import { Analytics } from '@vercel/analytics/react';
 
 const SECTIONS = ['home', 'about-me', 'projects', 'contacts'];
 
@@ -207,6 +208,7 @@ export function App() {
 
   return (
     <div className="portfolio-app">
+      <Analytics />
       {/* Sleek circular white-border cursor tracker */}
       <CursorTracker />
 
