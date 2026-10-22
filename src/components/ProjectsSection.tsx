@@ -4,6 +4,7 @@ import { getMediaUrl } from '../utils/media';
 
 export interface DisplayProject {
   id: string;
+  slug: string;
   title: string;
   subtitle: string;
   description: string;
@@ -19,6 +20,7 @@ interface ProjectsSectionProps {
   articles?: PortfolioArticle[];
   githubUrl?: string | null;
   isLoading?: boolean;
+  onInspectArticle?: (slug: string) => void;
 }
 
 function stripHtml(html?: string | null): string {
@@ -34,6 +36,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   articles,
   githubUrl,
   isLoading = false,
+  onInspectArticle,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -60,6 +63,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 
       return {
         id: String(art.id),
+        slug: art.slug,
         title: art.title,
         subtitle: art.category?.name || 'Project',
         description,
@@ -77,7 +81,6 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   const [cardIndex, setCardIndex] = useState(0);
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const [showMobileExplore, setShowMobileExplore] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<DisplayProject | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -176,7 +179,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
           el.style.transform = '';
           el.style.opacity = '';
           el.style.zIndex = '';
-          el.style.pointerEvents = '';
+          el.style.pointerEvents = 'auto';
         });
 
         const containerWidth = track.parentElement ? track.parentElement.clientWidth : window.innerWidth;
@@ -364,7 +367,6 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                     <div className="card-top">
                       <div className="card-index-row">
                         <span className="card-index">0{idx + 1}</span>
-                        <span className="project-subtitle">{project.subtitle}</span>
                       </div>
                       <h3 className="project-title">{project.title}</h3>
                     </div>
@@ -381,26 +383,15 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                   </div>
 
                   <div className="project-actions">
-                    {project.github ? (
-                      <a
-                        href={project.github}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="project-btn project-btn-ghost"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                        </svg>
-                        Source Code
-                      </a>
-                    ) : null}
                     <button
                       type="button"
                       className="project-btn project-btn-primary"
                       onClick={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
-                        setSelectedProject(project);
+                        if (onInspectArticle) {
+                          onInspectArticle(project.slug);
+                        }
                       }}
                     >
                       Inspect Project →
@@ -462,86 +453,6 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
           </a>
         </div>
       </div>
-
-      {/* Project Detail Modal */}
-      {selectedProject && (
-        <div
-          className="project-modal-backdrop"
-          onClick={() => setSelectedProject(null)}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="project-modal-card"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="modal-close-btn"
-              onClick={() => setSelectedProject(null)}
-              aria-label="Close modal"
-            >
-              ✕
-            </button>
-
-            {selectedProject.thumbnailUrl && (
-              <div className="modal-thumbnail-wrapper">
-                <img
-                  src={getMediaUrl(selectedProject.thumbnailUrl)}
-                  alt={selectedProject.title}
-                  className="modal-thumbnail-img"
-                  onError={(e) => {
-                    // Hide thumbnail if image fails to load
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
-                />
-              </div>
-            )}
-
-            <div className="modal-content">
-              <span className="modal-eyebrow">{selectedProject.subtitle}</span>
-              <h3 className="modal-title">{selectedProject.title}</h3>
-
-              <div className="modal-tags">
-                {selectedProject.tags.map((t, i) => (
-                  <span key={i} className="tag-pill">
-                    {t}
-                  </span>
-                ))}
-              </div>
-
-              <div className="modal-description">
-                {selectedProject.rawHtmlDesc ? (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: selectedProject.rawHtmlDesc }}
-                    className="modal-rich-desc"
-                  />
-                ) : (
-                  <p>{selectedProject.description}</p>
-                )}
-              </div>
-
-              <div className="modal-actions">
-                <a
-                  href={selectedProject.github}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="project-btn project-btn-ghost"
-                >
-                  GitHub Repository
-                </a>
-                <button
-                  type="button"
-                  className="project-btn project-btn-primary"
-                  onClick={() => setSelectedProject(null)}
-                >
-                  Close Window
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 };

@@ -137,3 +137,13 @@ export async function fetchPortfolioArticles(category?: string, search?: string)
 
   return Array.isArray(data) ? data : [];
 }
+
+/**
+ * Fetch individual article / project detail by slug directly (/articles/{slug})
+ */
+export async function fetchArticleBySlug(slug: string): Promise<PortfolioArticle | null> {
+  if (!slug) return null;
+  const cleanSlug = slug.trim();
+  const data = await fetchEndpoint<PortfolioArticle>(`articles/${encodeURIComponent(cleanSlug)}`);
+  return data ?? null;
+}

@@ -8,6 +8,7 @@ import { AboutSection } from './components/AboutSection';
 import { ProjectsSection } from './components/ProjectsSection';
 import { ContactSection } from './components/ContactSection';
 import { CursorTracker } from './components/CursorTracker';
+import { ArticleDetailPage } from './components/ArticleDetailPage';
 import {
   fetchPortfolioConfig,
   fetchPortfolioSkills,
@@ -24,7 +25,29 @@ import { Analytics } from '@vercel/analytics/react';
 
 const SECTIONS = ['home', 'about-me', 'projects', 'contacts'];
 
+function getArticleSlugFromUrl(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  // 1. Path format: /articles/:slug or /article/:slug
+  const pathname = window.location.pathname;
+  const pathMatch = pathname.match(/^\/articles?\/([^/?#]+)/i);
+  if (pathMatch) return decodeURIComponent(pathMatch[1]);
+
+  // 2. Hash format: #/articles/:slug or #/article/:slug
+  const hash = window.location.hash;
+  const hashMatch = hash.match(/^#\/?articles?\/([^/?#]+)/i);
+  if (hashMatch) return decodeURIComponent(hashMatch[1]);
+
+  // 3. Query param format: ?article=:slug
+  const searchParams = new URLSearchParams(window.location.search);
+  const querySlug = searchParams.get('article');
+  if (querySlug) return querySlug;
+
+  return null;
+}
+
 export function App() {
+  const [activeArticleSlug, setActiveArticleSlug] = useState<string | null>(() => getArticleSlugFromUrl());
   const [activeSection, setActiveSection] = useState('home');
   const [config, setConfig] = useState<PortfolioConfig | null>(null);
   const [skills, setSkills] = useState<PortfolioSkill[]>([]);
@@ -34,6 +57,36 @@ export function App() {
   const [isLoadingArticles, setIsLoadingArticles] = useState(true);
   const lenisRef = useRef<Lenis | null>(null);
   const activeSectionIndexRef = useRef(0);
+
+  // Sync state when navigating using browser Back/Forward buttons
+  useEffect(() => {
+    const onPopState = () => {
+      const slug = getArticleSlugFromUrl();
+      setActiveArticleSlug(slug);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const handleInspectArticle = (slug: string) => {
+    window.history.pushState({ articleSlug: slug }, '', `/articles/${slug}`);
+    setActiveArticleSlug(slug);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const handleBackFromArticle = () => {
+    window.history.pushState(null, '', '/');
+    setActiveArticleSlug(null);
+    if (config?.name) {
+      document.title = `${config.name} — Portfolio`;
+    }
+    setTimeout(() => {
+      const projectsEl = document.getElementById('projects');
+      if (projectsEl) {
+        projectsEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 50);
+  };
 
   // Fetch individual endpoints concurrently from baseurl
   useEffect(() => {
@@ -100,6 +153,25 @@ export function App() {
 
   // Smooth cinematic scroll transition on navbar navigation
   const handleNavigate = (sectionId: string) => {
+    if (activeArticleSlug) {
+      window.history.pushState(null, '', '/');
+      setActiveArticleSlug(null);
+      if (config?.name) {
+        document.title = `${config.name} — Portfolio`;
+      }
+      setTimeout(() => {
+        const targetEl = document.getElementById(sectionId);
+        if (targetEl) {
+          if (lenisRef.current) {
+            lenisRef.current.scrollTo(targetEl, { immediate: false, duration: 1.2 });
+          } else {
+            targetEl.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      }, 60);
+      return;
+    }
+
     const targetEl = document.getElementById(sectionId);
     if (!targetEl) return;
 
@@ -142,6 +214,7 @@ export function App() {
 
     // Continuous real-time scroll synchronization
     const onScroll = () => {
+      if (activeArticleSlug) return;
       const vh = window.innerHeight || 1;
 
       // Determine active section based on proximity to center
@@ -179,6 +252,7 @@ export function App() {
 
     // Keyboard navigation (ArrowDown / ArrowUp / PageDown / PageUp)
     const onKeyDown = (e: KeyboardEvent) => {
+      if (activeArticleSlug) return;
       const target = e.target as HTMLElement;
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
         return;
@@ -204,7 +278,7 @@ export function App() {
       window.removeEventListener('keydown', onKeyDown);
       lenis.destroy();
     };
-  }, []);
+  }, [activeArticleSlug]);
 
   return (
     <div className="portfolio-app">
@@ -214,38 +288,50 @@ export function App() {
 
       {/* Glassmorphic floating navbar with dynamic brand name */}
       <Navbar
-        activeSection={activeSection}
+        activeSection={activeArticleSlug ? 'projects' : activeSection}
         onNavigate={handleNavigate}
         brandName={config?.name || 'Portfolio'}
       />
 
-      {/* Fixed 3D canvas positioned in the background / layer with crash protection */}
-      <ErrorBoundary>
-        <ModelViewer />
-      </ErrorBoundary>
+      {/* Fixed 3D canvas positioned in the background / layer with crash protection (hidden in article detail) */}
+      {!activeArticleSlug && (
+        <ErrorBoundary>
+          <ModelViewer />
+        </ErrorBoundary>
+      )}
 
-      {/* Page Sections matching frontend template */}
-      <main className="content-container">
-        <HeroSection
-          name={config?.name}
-          shortDesc={config?.short_desc}
+      {/* Main Dynamic View: Article Detail Page or Main Portfolio Sections */}
+      {activeArticleSlug ? (
+        <ArticleDetailPage
+          slug={activeArticleSlug}
+          onBack={handleBackFromArticle}
+          initialArticle={articles.find((a) => a.slug === activeArticleSlug)}
+          brandName={config?.name || 'Portfolio'}
         />
-        <AboutSection
-          name={config?.name}
-          desc={config?.desc}
-          profileUrl={config?.profile_url}
-          skills={skills}
-          isLoading={isLoadingConfig || isLoadingSkills}
-        />
-        <ProjectsSection
-          articles={articles}
-          githubUrl={config?.github_url}
-          isLoading={isLoadingArticles}
-        />
-        <ContactSection config={config} />
-      </main>
+      ) : (
+        <main className="content-container">
+          <HeroSection
+            name={config?.name}
+            shortDesc={config?.short_desc}
+          />
+          <AboutSection
+            name={config?.name}
+            desc={config?.desc}
+            profileUrl={config?.profile_url}
+            skills={skills}
+            isLoading={isLoadingConfig || isLoadingSkills}
+          />
+          <ProjectsSection
+            articles={articles}
+            githubUrl={config?.github_url}
+            isLoading={isLoadingArticles}
+            onInspectArticle={handleInspectArticle}
+          />
+          <ContactSection config={config} />
+        </main>
+      )}
     </div>
   );
-}
+};
 
 export default App;
