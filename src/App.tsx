@@ -294,7 +294,7 @@ export function App() {
         activeSection={activeArticleSlug ? 'projects' : activeSection}
         onNavigate={handleNavigate}
         brandName={config?.name || 'Portfolio'}
-        isSolidBlack={!!activeArticleSlug}
+        isDetailPage={!!activeArticleSlug}
       />
 
       {/* Fixed 3D canvas positioned in the background / layer with crash protection (hidden in article detail) */}

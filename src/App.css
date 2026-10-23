@@ -21,6 +21,12 @@
   justify-content: center;
   z-index: 100;
   pointer-events: none; /* Allows canvas drag behind header outside pill */
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+.navbar-wrapper.is-detail {
+  justify-content: flex-end;
 }
 
 .glass-navbar {
@@ -40,7 +46,17 @@
     0 16px 40px -10px rgba(0, 0, 0, 0.8),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
     inset 0 -1px 0 0 rgba(0, 0, 0, 0.4);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              margin-right 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              padding 0.35s ease,
+              background 0.35s ease,
+              border-color 0.35s ease,
+              box-shadow 0.35s ease,
+              transform 0.25s ease;
+  will-change: width, margin-right, height;
+  position: relative;
+  overflow: hidden;
 }
 
 .glass-navbar:hover {
@@ -50,22 +66,118 @@
     inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
 }
 
-/* Detail page solid black navbar variant */
-.glass-navbar.navbar-solid-black {
+/* Detail page solid black variant */
+.glass-navbar.navbar-detail-mode {
   background: #000000 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  box-shadow:
-    0 20px 40px -10px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.35) !important;
 }
 
-.glass-navbar.navbar-solid-black:hover {
-  border-color: rgba(255, 255, 255, 0.32) !important;
-  box-shadow:
-    0 24px 48px -10px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2) !important;
+/* Detail page centered state (when at top or manually open) */
+.glass-navbar.navbar-detail-mode.is-centered {
+  margin-right: max(0px, calc((100vw - 48px - min(92vw, 840px)) / 2));
+  width: min(92vw, 840px);
+  height: 60px;
+  padding: 0 32px;
+}
+
+/* Detail page shrunk state: Compact hamburger pill shifted to the right */
+.glass-navbar.navbar-detail-mode.is-shrunk {
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  margin-right: 0;
+  border-radius: 9999px;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45) !important;
+}
+
+.glass-navbar.navbar-detail-mode.is-shrunk:hover {
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  transform: scale(1.08);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* Hide brand and links when in shrunk hamburger mode */
+.glass-navbar.is-shrunk .navbar-brand,
+.glass-navbar.is-shrunk .navbar-links {
+  opacity: 0;
+  pointer-events: none;
+  display: none;
+}
+
+.glass-navbar.navbar-detail-mode.is-centered .navbar-brand,
+.glass-navbar.navbar-detail-mode.is-centered .navbar-links {
+  opacity: 1;
+  pointer-events: auto;
+  display: flex;
+  animation: navbarFadeIn 0.35s ease 0.12s both;
+}
+
+@keyframes navbarFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hamburger 3-line icon */
+.navbar-hamburger-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 20px;
+  height: 14px;
+  pointer-events: none;
+}
+
+.hamburger-bar {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: #ffffff;
+  border-radius: 9999px;
+}
+
+/* Close Button on manually open navbar */
+.navbar-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.navbar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+@media (max-width: 768px) {
+  .navbar-wrapper {
+    padding: 0 16px;
+  }
+  .glass-navbar.navbar-detail-mode.is-centered {
+    margin-right: 0;
+    width: calc(100vw - 32px);
+    padding: 0 18px;
+  }
 }
 
 .navbar-brand {
