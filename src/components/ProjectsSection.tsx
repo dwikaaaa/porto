@@ -229,7 +229,12 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
       id="projects"
       ref={containerRef}
       className="projects-scroll-wrapper"
-      style={{ '--mobile-stack-count': Math.max(1, projects.length) } as React.CSSProperties}
+      style={
+        {
+          '--project-count': Math.max(1, projects.length),
+          '--mobile-stack-count': Math.max(1, projects.length),
+        } as React.CSSProperties
+      }
     >
       <div className="projects-sticky-viewport">
         {/* Header with pill indicators and controls */}
