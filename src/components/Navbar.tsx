@@ -4,16 +4,18 @@ interface NavbarProps {
   activeSection: string;
   onNavigate: (sectionId: string) => void;
   brandName?: string;
+  isSolidBlack?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeSection,
   onNavigate,
   brandName = 'Portfolio',
+  isSolidBlack = false,
 }) => {
   return (
     <header className="navbar-wrapper">
-      <nav className="glass-navbar">
+      <nav className={`glass-navbar ${isSolidBlack ? 'navbar-solid-black' : ''}`}>
         <div
           className="navbar-brand"
           onClick={() => onNavigate('home')}

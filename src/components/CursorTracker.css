@@ -7,6 +7,7 @@
   pointer-events: none;
   z-index: 999999;
   overflow: hidden;
+  mix-blend-mode: difference;
 }
 
 .cursor-ring {

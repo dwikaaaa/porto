@@ -71,6 +71,9 @@ export function App() {
   const handleInspectArticle = (slug: string) => {
     window.history.pushState({ articleSlug: slug }, '', `/articles/${slug}`);
     setActiveArticleSlug(slug);
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0, { immediate: true });
+    }
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -291,6 +294,7 @@ export function App() {
         activeSection={activeArticleSlug ? 'projects' : activeSection}
         onNavigate={handleNavigate}
         brandName={config?.name || 'Portfolio'}
+        isSolidBlack={!!activeArticleSlug}
       />
 
       {/* Fixed 3D canvas positioned in the background / layer with crash protection (hidden in article detail) */}
@@ -303,6 +307,7 @@ export function App() {
       {/* Main Dynamic View: Article Detail Page or Main Portfolio Sections */}
       {activeArticleSlug ? (
         <ArticleDetailPage
+          key={activeArticleSlug}
           slug={activeArticleSlug}
           onBack={handleBackFromArticle}
           initialArticle={articles.find((a) => a.slug === activeArticleSlug)}
