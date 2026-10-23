@@ -1,0 +1,229 @@
+/* ========================================================
+   LANGUAGE SWITCHER STYLING (Desktop Pill & Mobile Floating Button)
+   ======================================================== */
+
+/* 1. Desktop Pill Trigger inside Navbar */
+.lang-switcher-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.lang-switcher-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #f4f4f5;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.lang-switcher-btn:hover,
+.lang-switcher-btn.is-active {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.lang-globe-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.9;
+}
+
+.lang-current-code {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.lang-chevron-icon {
+  opacity: 0.65;
+  transition: transform 0.25s ease;
+}
+
+.lang-chevron-icon.rotate {
+  transform: rotate(180deg);
+}
+
+/* 2. Floating Circular Button for Mobile View (Hidden on Desktop) */
+.lang-floating-mobile-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Completely hide language switcher in navbar on mobile screens */
+  .lang-switcher-container,
+  .navbar-lang-item {
+    display: none !important;
+  }
+
+  /* Show floating circular button at bottom-right corner of screen */
+  .lang-floating-mobile-btn {
+    display: flex;
+    position: fixed;
+    bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 18px));
+    right: max(20px, calc(env(safe-area-inset-right, 0px) + 18px));
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #09090b;
+    border: 1.5px solid rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+    box-shadow:
+      0 12px 36px rgba(0, 0, 0, 0.8),
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 999999;
+    pointer-events: auto;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .lang-floating-mobile-btn:active,
+  .lang-floating-mobile-btn.is-active {
+    transform: scale(0.92);
+    border-color: rgba(255, 255, 255, 0.45);
+    background: #18181b;
+  }
+
+  .lang-floating-mobile-btn svg {
+    flex-shrink: 0;
+  }
+
+  .mobile-btn-code {
+    position: absolute;
+    bottom: 3px;
+    right: 4px;
+    font-size: 0.58rem;
+    font-weight: 800;
+    background: #ffffff;
+    color: #000000;
+    padding: 1px 4px;
+    border-radius: 6px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* 3. React Portal Dropdown Menu (Fixed in body, Never clipped) */
+.lang-dropdown-menu {
+  width: 205px;
+  background: rgba(14, 14, 18, 0.96);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 18px;
+  padding: 8px;
+  box-shadow:
+    0 24px 60px -10px rgba(0, 0, 0, 0.9),
+    0 0 1px 1px rgba(255, 255, 255, 0.15);
+  user-select: none;
+}
+
+.lang-dropdown-menu.from-top {
+  animation: langDropdownFromTop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top right;
+}
+
+.lang-dropdown-menu.from-bottom {
+  animation: langDropdownFromBottom 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: bottom right;
+}
+
+@keyframes langDropdownFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes langDropdownFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.lang-dropdown-header {
+  padding: 8px 12px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a1a1aa;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 6px;
+}
+
+.lang-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 290px;
+  overflow-y: auto;
+}
+
+.lang-option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  color: #d4d4d8;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+}
+
+.lang-option-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.lang-option-item.is-selected {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.lang-flag {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.lang-label {
+  flex: 1;
+}
+
+.lang-check-icon {
+  color: #60a5fa;
+  flex-shrink: 0;
+}

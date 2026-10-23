@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface NavbarProps {
   activeSection: string;
@@ -132,6 +133,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               Contacts
             </button>
+          </li>
+          <li className="navbar-lang-item">
+            <LanguageSwitcher />
           </li>
         </ul>
 

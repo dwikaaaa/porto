@@ -82,3 +82,56 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* ========================================================
+   GOOGLE TRANSLATE OVERRIDES (Prism-Clean UI)
+   ======================================================== */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner-frame,
+iframe.goog-te-banner-frame,
+.skiptranslate iframe {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Sembunyikan Google Translate Loading Spinner / Logo Widget yang stuck */
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+.VIpgJd-ZVi9od-aZ2wEe-OiiCO,
+.VIpgJd-ZVi9od-aZ2wEe,
+[class*="VIpgJd-ZVi9od"],
+.goog-te-spinner-pos,
+.goog-te-spinner,
+.goog-te-spinner-animation,
+#goog-gt-tt,
+.goog-te-balloon-frame {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+#google_translate_element {
+  display: none !important;
+}
+
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+
+.goog-text-highlight {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+font {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+

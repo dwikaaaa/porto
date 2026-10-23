@@ -203,10 +203,16 @@
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 36px;
+  gap: 28px;
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.navbar-lang-item {
+  display: flex;
+  align-items: center;
+  margin-left: 4px;
 }
 
 .nav-item {
