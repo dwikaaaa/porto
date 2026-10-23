@@ -703,9 +703,10 @@
 
 .about-photo-frame {
   position: relative;
-  width: 100%;
-  max-width: 340px;
-  height: 420px;
+  width: fit-content;
+  max-width: min(100%, 340px);
+  height: auto;
+  max-height: 440px;
   border-radius: 18px;
   overflow: hidden;
   background: #09090b;
@@ -713,6 +714,9 @@
   box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.95), 0 0 40px rgba(255, 255, 255, 0.03);
   flex-shrink: 0;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .about-photo-frame:hover {
@@ -721,10 +725,12 @@
 }
 
 .about-profile-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 20%;
+  width: auto;
+  height: auto;
+  max-width: min(100%, 340px);
+  max-height: 440px;
+  object-fit: contain;
+  object-position: center;
   filter: contrast(1.05) saturate(1.02);
   display: block;
 }
@@ -732,8 +738,7 @@
 .photo-vignette-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, transparent 45%, rgba(9, 9, 11, 0.6) 100%),
-              linear-gradient(to top, rgba(9, 9, 11, 0.7) 0%, transparent 40%);
+  background: radial-gradient(circle at center, transparent 65%, rgba(9, 9, 11, 0.35) 100%);
   pointer-events: none;
 }
 
@@ -751,8 +756,9 @@
 .photo-corner-br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
 
 .about-photo-placeholder {
-  width: 100%;
-  height: 100%;
+  width: 280px;
+  height: 360px;
+  max-width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1698,10 +1704,16 @@
   }
 
   .about-photo-frame {
-    height: 280px !important;
-    width: 280px !important;
-    max-width: 100% !important;
+    width: fit-content !important;
+    height: auto !important;
+    max-width: 280px !important;
+    max-height: 360px !important;
     margin: 0 auto 16px !important;
+  }
+
+  .about-profile-image {
+    max-width: 280px !important;
+    max-height: 360px !important;
   }
 
   .about-photo-info {
@@ -2144,10 +2156,16 @@
   }
 
   .about-photo-frame {
-    height: 240px !important;
-    width: 240px !important;
-    max-width: 100% !important;
+    width: fit-content !important;
+    height: auto !important;
+    max-width: 240px !important;
+    max-height: 300px !important;
     margin: 0 auto 14px !important;
+  }
+
+  .about-profile-image {
+    max-width: 240px !important;
+    max-height: 300px !important;
   }
 
   .photo-artisan-name {
@@ -2335,8 +2353,15 @@
   }
 
   .about-photo-frame {
-    height: 200px !important;
-    width: 200px !important;
+    width: fit-content !important;
+    height: auto !important;
+    max-width: 200px !important;
+    max-height: 250px !important;
+  }
+
+  .about-profile-image {
+    max-width: 200px !important;
+    max-height: 250px !important;
   }
 }
 
@@ -2373,7 +2398,13 @@
   }
 
   .about-photo-frame {
-    height: 180px;
+    height: auto !important;
+    max-height: 200px !important;
+    width: fit-content !important;
+  }
+
+  .about-profile-image {
+    max-height: 200px !important;
   }
 }
 
