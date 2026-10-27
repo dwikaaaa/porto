@@ -89,6 +89,31 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 
     let rafId: number | null = null;
 
+    // Content-Driven Best Practice: calculate required vertical scroll height from physical track overflow
+    const updateDimensions = () => {
+      const isMobile = window.innerWidth <= 960;
+      if (isMobile) {
+        if (container.style.getPropertyValue('--desktop-scroll-height')) {
+          container.style.removeProperty('--desktop-scroll-height');
+        }
+        return;
+      }
+
+      const containerWidth = track.parentElement ? track.parentElement.clientWidth : window.innerWidth;
+      const maxTranslate = Math.max(0, track.scrollWidth - containerWidth);
+
+      // Best Practice Pace Factor: 1.08 ensures consistent, natural scroll feel regardless of project count
+      const paceFactor = 1.08;
+      const scrollDistance = maxTranslate > 0 ? Math.round(maxTranslate * paceFactor) : 0;
+      const totalHeight = window.innerHeight + scrollDistance;
+      const newHeightStr = `${totalHeight}px`;
+
+      if (container.style.getPropertyValue('--desktop-scroll-height') !== newHeightStr) {
+        container.style.setProperty('--desktop-scroll-height', newHeightStr);
+        window.dispatchEvent(new Event('resize'));
+      }
+    };
+
     const handleScroll = () => {
       const rect = container.getBoundingClientRect();
       const vh = window.innerHeight;
@@ -184,9 +209,11 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 
         const containerWidth = track.parentElement ? track.parentElement.clientWidth : window.innerWidth;
         const maxTranslate = Math.max(0, track.scrollWidth - containerWidth);
-        track.style.transform = `translate3d(-${progress * maxTranslate}px, 0, 0)`;
+        // Map horizontal cards translation seamlessly across container progress
+        const cardTrackProgress = progress;
+        track.style.transform = `translate3d(-${(cardTrackProgress * maxTranslate).toFixed(1)}px, 0, 0)`;
 
-        const activeIdx = Math.min(TOTAL_CARDS - 1, Math.floor(progress * TOTAL_CARDS));
+        const activeIdx = Math.min(TOTAL_CARDS - 1, Math.floor(cardTrackProgress * TOTAL_CARDS));
         setCardIndex(activeIdx);
         setShowMobileExplore(false);
       }
@@ -203,14 +230,32 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
       });
     };
 
-    window.addEventListener('scroll', onScrollOrResize, { passive: true });
-    window.addEventListener('resize', onScrollOrResize);
+    const onResize = () => {
+      updateDimensions();
+      onScrollOrResize();
+    };
+
+    updateDimensions();
     handleScroll();
+
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onResize);
+
+    // Observe changes in track size (e.g. when card images load or items update)
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => {
+        updateDimensions();
+        onScrollOrResize();
+      });
+      resizeObserver.observe(track);
+    }
 
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
+      if (resizeObserver) resizeObserver.disconnect();
       window.removeEventListener('scroll', onScrollOrResize);
-      window.removeEventListener('resize', onScrollOrResize);
+      window.removeEventListener('resize', onResize);
     };
   }, [TOTAL_CARDS, isPending, projects.length]);
 
@@ -218,6 +263,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     if (!containerRef.current) return;
     const container = containerRef.current;
     const totalDistance = container.offsetHeight - window.innerHeight;
+    if (totalDistance <= 0) return;
     const targetProgress = TOTAL_CARDS > 1 ? idx / (TOTAL_CARDS - 1) : 0;
     const containerTop = container.offsetTop;
     const targetScrollY = containerTop + targetProgress * totalDistance;

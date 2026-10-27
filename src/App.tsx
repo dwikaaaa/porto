@@ -246,10 +246,55 @@ export function App() {
     });
     lenisRef.current = lenis;
 
+    // Desktop diagonal transition between Projects and Contacts (down-right direction)
+    const updateDiagonalTransition = () => {
+      const contactsEl = document.getElementById('contacts');
+      const projectsSticky = document.querySelector<HTMLElement>('.projects-sticky-viewport');
+      if (!contactsEl || !projectsSticky) return;
+
+      if (window.innerWidth <= 960 || activeArticleSlug) {
+        if (projectsSticky.style.transform) projectsSticky.style.transform = '';
+        if (contactsEl.style.transform) contactsEl.style.transform = '';
+        if (contactsEl.style.opacity) contactsEl.style.opacity = '';
+        return;
+      }
+
+      const vh = window.innerHeight || 1;
+      const rect = contactsEl.getBoundingClientRect();
+
+      // rect.top is the vertical distance from viewport top to #contacts
+      // As user scrolls from projects into contacts, rect.top goes from vh down to 0
+      if (rect.top >= vh) {
+        // Not in transition yet (inside projects)
+        if (projectsSticky.style.transform) projectsSticky.style.transform = '';
+        if (contactsEl.style.transform) contactsEl.style.transform = '';
+        if (contactsEl.style.opacity) contactsEl.style.opacity = '';
+      } else if (rect.top <= 0) {
+        // Transition completed (settled in contacts)
+        projectsSticky.style.transform = `translate3d(-${(window.innerWidth * 0.9).toFixed(1)}px, 0, 0)`;
+        contactsEl.style.transform = '';
+        contactsEl.style.opacity = '1';
+      } else {
+        // Transitioning: t from 0 (at vh) to 1 (at 0)
+        const t = Math.min(1, Math.max(0, (vh - rect.top) / vh));
+        const shiftX = window.innerWidth * 0.9;
+
+        // Outgoing Projects shifts top-left (upwards naturally by scroll, leftwards by transform)
+        projectsSticky.style.transform = `translate3d(-${(t * shiftX).toFixed(1)}px, 0, 0)`;
+
+        // Incoming Contacts enters from bottom-right towards center
+        contactsEl.style.transform = `translate3d(${((1 - t) * shiftX).toFixed(1)}px, 0, 0)`;
+        contactsEl.style.opacity = Math.min(1, Math.max(0.15, t * 1.4)).toFixed(2);
+      }
+    };
+
     // Continuous real-time scroll synchronization
     const onScroll = () => {
       if (activeArticleSlug) return;
       const vh = window.innerHeight || 1;
+
+      // Update desktop diagonal transition
+      updateDiagonalTransition();
 
       // Determine active section based on proximity to center
       let bestIdx = 0;
@@ -282,7 +327,16 @@ export function App() {
       }
     };
 
+    const onResize = () => {
+      if (lenisRef.current) {
+        lenisRef.current.resize();
+      }
+      onScroll();
+    };
+
     lenis.on('scroll', onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
 
     // Keyboard navigation (ArrowDown / ArrowUp / PageDown / PageUp)
     const onKeyDown = (e: KeyboardEvent) => {
@@ -310,7 +364,16 @@ export function App() {
 
     return () => {
       window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
       lenis.destroy();
+      const contactsEl = document.getElementById('contacts');
+      const projectsSticky = document.querySelector<HTMLElement>('.projects-sticky-viewport');
+      if (projectsSticky) projectsSticky.style.transform = '';
+      if (contactsEl) {
+        contactsEl.style.transform = '';
+        contactsEl.style.opacity = '';
+      }
     };
   }, [activeArticleSlug]);
 

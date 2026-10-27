@@ -831,9 +831,9 @@
    ======================================================== */
 .projects-scroll-wrapper {
   position: relative;
-  /* Provides calmer, deliberate, less sensitive scroll distance scaled with project count */
-  height: calc(100vh + max(4, var(--project-count, 6)) * 95vh);
-  min-height: 600vh;
+  /* Dynamic content-based height on desktop via JS; graceful fallback if not yet measured */
+  height: var(--desktop-scroll-height, calc(100vh + max(2, var(--project-count, 4)) * 90vh));
+  min-height: 100vh;
   box-sizing: border-box;
   pointer-events: auto;
 }
@@ -1273,6 +1273,20 @@
   display: flex;
   align-items: center;
   padding: 70px 48px 24px;
+}
+
+/* Desktop diagonal scroll transition performance */
+@media (min-width: 961px) {
+  .projects-sticky-viewport {
+    will-change: transform;
+    transition: none;
+  }
+
+  .contact-section {
+    position: relative;
+    will-change: transform, opacity;
+    transition: none;
+  }
 }
 
 .contact-section .section-header {
@@ -1791,7 +1805,7 @@
 
   /* Projects Section on Tablet/Mobile: Scroll Stack Animation */
   .projects-scroll-wrapper {
-    height: calc(100vh + (var(--mobile-stack-count, 4) - 1) * 110vh) !important;
+    height: calc(100vh + (var(--mobile-stack-count, 4) - 1) * 90vh) !important;
     position: relative !important;
   }
 
