@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import type { PortfolioArticle } from '../types/portfolio';
 import { fetchArticleBySlug } from '../services/api';
 import { getMediaUrl } from '../utils/media';
+import {
+  updatePageSeo,
+  generateArticleJsonLd,
+  cleanTextSnippet,
+  SITE_URL,
+} from '../utils/seo';
 import './ArticleDetailPage.css';
 
 interface ArticleDetailPageProps {
@@ -41,6 +47,30 @@ export const ArticleDetailPage: React.FC<ArticleDetailPageProps> = ({
     // Scroll to top when opening detail page
     window.scrollTo({ top: 0, behavior: 'instant' });
 
+    const applyArticleSeo = (targetArticle: PortfolioArticle) => {
+      const thumbUrl = targetArticle.thumbnail_url
+        ? getMediaUrl(targetArticle.thumbnail_url)
+        : undefined;
+      const desc =
+        targetArticle.sub_title ||
+        cleanTextSnippet(targetArticle.desc) ||
+        `Project case study of ${targetArticle.title}`;
+
+      updatePageSeo({
+        title: `${targetArticle.title} — ${brandName}`,
+        description: desc,
+        canonicalUrl: `${SITE_URL}/articles/${targetArticle.slug}`,
+        imageUrl: thumbUrl,
+        type: 'article',
+        author: brandName,
+        jsonLd: generateArticleJsonLd(targetArticle, brandName),
+      });
+    };
+
+    if (initialArticle) {
+      applyArticleSeo(initialArticle);
+    }
+
     // Precise timer matching the curtain animation (0.8s) so card entrance triggers smoothly
     const curtainTimer = setTimeout(() => {
       setCurtainDone(true);
@@ -52,9 +82,7 @@ export const ArticleDetailPage: React.FC<ArticleDetailPageProps> = ({
         if (!isMounted) return;
         if (data) {
           setArticle(data);
-          if (data.title) {
-            document.title = `${data.title} — ${brandName}`;
-          }
+          applyArticleSeo(data);
         } else if (!initialArticle) {
           setError('Article not found.');
         }

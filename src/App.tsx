@@ -20,6 +20,15 @@ import type {
   PortfolioSkill,
 } from './types/portfolio';
 import { getMediaUrl } from './utils/media';
+import {
+  updatePageSeo,
+  generateHomeJsonLd,
+  cleanTextSnippet,
+  DEFAULT_AUTHOR,
+  DEFAULT_DESCRIPTION,
+  DEFAULT_IMAGE,
+  SITE_URL,
+} from './utils/seo';
 import './App.css';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -58,15 +67,41 @@ export function App() {
   const lenisRef = useRef<Lenis | null>(null);
   const activeSectionIndexRef = useRef(0);
 
+  const restoreHomeSeo = (currentConfig: PortfolioConfig | null) => {
+    const authorName = currentConfig?.name || DEFAULT_AUTHOR;
+    const description =
+      currentConfig?.short_desc ||
+      cleanTextSnippet(currentConfig?.desc) ||
+      DEFAULT_DESCRIPTION;
+    const imageUrl = currentConfig?.background_url
+      ? getMediaUrl(currentConfig.background_url)
+      : currentConfig?.profile_url
+        ? getMediaUrl(currentConfig.profile_url)
+        : DEFAULT_IMAGE;
+
+    updatePageSeo({
+      title: `${authorName} — Web Developer & Software Craftsman | Portfolio`,
+      description,
+      canonicalUrl: `${SITE_URL}/`,
+      imageUrl,
+      type: 'website',
+      author: authorName,
+      jsonLd: generateHomeJsonLd(currentConfig),
+    });
+  };
+
   // Sync state when navigating using browser Back/Forward buttons
   useEffect(() => {
     const onPopState = () => {
       const slug = getArticleSlugFromUrl();
       setActiveArticleSlug(slug);
+      if (!slug) {
+        restoreHomeSeo(config);
+      }
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, []);
+  }, [config]);
 
   const handleInspectArticle = (slug: string) => {
     window.history.pushState({ articleSlug: slug }, '', `/articles/${slug}`);
@@ -80,9 +115,7 @@ export function App() {
   const handleBackFromArticle = () => {
     window.history.pushState(null, '', '/');
     setActiveArticleSlug(null);
-    if (config?.name) {
-      document.title = `${config.name} — Portfolio`;
-    }
+    restoreHomeSeo(config);
     setTimeout(() => {
       const projectsEl = document.getElementById('projects');
       if (projectsEl) {
@@ -102,9 +135,9 @@ export function App() {
         if (cfg) {
           setConfig(cfg);
 
-          // Dynamic Document Title based on config.name
-          if (cfg.name) {
-            document.title = `${cfg.name} — Portfolio`;
+          // Apply full dynamic SEO if currently on the home page
+          if (!getArticleSlugFromUrl()) {
+            restoreHomeSeo(cfg);
           }
 
           // Dynamic Favicon using config.logo_url
@@ -159,9 +192,7 @@ export function App() {
     if (activeArticleSlug) {
       window.history.pushState(null, '', '/');
       setActiveArticleSlug(null);
-      if (config?.name) {
-        document.title = `${config.name} — Portfolio`;
-      }
+      restoreHomeSeo(config);
       setTimeout(() => {
         const targetEl = document.getElementById(sectionId);
         if (targetEl) {

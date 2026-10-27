@@ -5,9 +5,16 @@ interface HeroSectionProps {
   shortDesc?: string | null;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ shortDesc }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ name, shortDesc }) => {
+  const displayName = name || 'Andika Dwi Prasetyo';
+
   return (
-    <section id="home" className="section hero-section">
+    <section id="home" className="section hero-section" aria-label="Introduction">
+      {/* Semantic H1 for Search Engines and Accessibility */}
+      <h1 className="sr-only">
+        {displayName} — Web Developer &amp; Software Craftsman
+      </h1>
+
       <div className="hero-content">
         {/* Subtle background atmospheric gradient glow */}
         <div className="hero-glow-backdrop" aria-hidden="true" />
